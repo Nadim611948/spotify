@@ -1,4 +1,3 @@
-
 // api/discography.js
 // Deployed on Vercel. Keeps SPOTIFY_CLIENT_SECRET on the server —
 // never exposed to the browser. Squarespace's page calls this endpoint
@@ -46,7 +45,15 @@ export default async function handler(req, res) {
     ]);
 
     if (!artistRes.ok || !albumsRes.ok) {
-      return res.status(502).json({ error: 'spotify_fetch_failed' });
+      const artistBody = await artistRes.text().catch(() => '');
+      const albumsBody = await albumsRes.text().catch(() => '');
+      return res.status(502).json({
+        error: 'spotify_fetch_failed',
+        artist_status: artistRes.status,
+        artist_body: artistBody.slice(0, 300),
+        albums_status: albumsRes.status,
+        albums_body: albumsBody.slice(0, 300)
+      });
     }
 
     const artist = await artistRes.json();
